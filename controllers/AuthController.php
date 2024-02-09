@@ -14,47 +14,33 @@ class AuthController extends AbstractController
 
     public function checkLogin() : void
     {
-
         if(isset($_POST["email"]) && isset($_POST["password"]))
         {
-            $tokenManager = new CSRFTokenManager();
+            $um = new UserManager();
+            $user = $um->findByEmail($_POST["email"]);
 
-            if(isset($_POST["csrf-token"]) && $tokenManager->validateCSRFToken($_POST["csrf-token"]))
+            if($user !== null)
             {
-                $um = new UserManager();
-                $user = $um->findByEmail($_POST["email"]);
-
-                if($user !== null)
+                if(password_verify($_POST["password"], $user->getPassword()))
                 {
-                    if(password_verify($_POST["password"], $user->getPassword()))
-                    {
-                        $_SESSION["user"] = $user->getId();
-
-                        unset($_SESSION["error-message"]);
-
-                        $this->redirect("index.php");
-                    }
-                    else
-                    {
-                        $_SESSION["error-message"] = "Invalid login information";
-                        $this->redirect("index.php?route=login");
-                    }
+                    $_SESSION["user"] = $user->getId();
+                    $this->redirect("index.php?route=login");
                 }
                 else
                 {
-                    $_SESSION["error-message"] = "Invalid login information";
+                    // invalid credentials (password)
                     $this->redirect("index.php?route=login");
                 }
             }
             else
             {
-                $_SESSION["error-message"] = "Invalid CSRF token";
+                // invalid credentials (email)
                 $this->redirect("index.php?route=login");
             }
         }
         else
         {
-            $_SESSION["error-message"] = "Missing fields";
+            // missing fields
             $this->redirect("index.php?route=login");
         }
     }
@@ -66,68 +52,48 @@ class AuthController extends AbstractController
 
     public function checkRegister() : void
     {
-        if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm-password"]))
+        if(isset($_POST["email"])
+            && isset($_POST["password"]) && isset($_POST["confirm-password"]))
         {
-            $tokenManager = new CSRFTokenManager();
-            if(isset($_POST["csrf-token"]) && $tokenManager->validateCSRFToken($_POST["csrf-token"]))
+            if($_POST["password"] === $_POST["confirm-password"])
             {
-                if($_POST["password"] === $_POST["confirm-password"])
+                $um = new UserManager();
+                $user = $um->findByEmail($_POST["email"]);
+
+                if($user === null)
                 {
-                    $password_pattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\d\s])[A-Za-z\d^\w\s]{8,}$/';
+                    $email = $_POST["email"];
+                    $password = password_hash($_POST["password"], PASSWORD_BCRYPT);
+                    $user = new User($email, $password);
 
-                    if (preg_match($password_pattern, $_POST["password"]))
-                    {
-                        $um = new UserManager();
-                        $user = $um->findByEmail($_POST["email"]);
+                    $um->create($user);
 
-                        if($user === null)
-                        {
-                            $email = htmlspecialchars($_POST["email"]);
-                            $password = password_hash($_POST["password"], PASSWORD_BCRYPT);
-                            $user = new User($email, $password);
+                    $_SESSION["user"] = $user->getId();
 
-                            $um->create($user);
-
-                            $_SESSION["user"] = $user->getId();
-
-                            unset($_SESSION["error-message"]);
-
-                            $this->redirect("index.php");
-                        }
-                        else
-                        {
-                            $_SESSION["error-message"] = "User already exists";
-                            $this->redirect("index.php?route=register");
-                        }
-                    }
-                    else {
-                        $_SESSION["error-message"] = "Password is not strong enough";
-                        $this->redirect("index.php?route=register");
-                    }
+                    $this->redirect("index.php?route=register");
                 }
                 else
                 {
-                    $_SESSION["error-message"] = "The passwords do not match";
+                    // user already exists
                     $this->redirect("index.php?route=register");
                 }
             }
             else
             {
-                $_SESSION["error-message"] = "Invalid CSRF token";
+                // password don't match
                 $this->redirect("index.php?route=register");
             }
         }
         else
         {
-            $_SESSION["error-message"] = "Missing fields";
+            // missing fields
             $this->redirect("index.php?route=register");
         }
     }
 
     public function logout() : void
     {
-        session_destroy();
-
-        $this->redirect("index.php");
+        unset($_SESSION["user"]);
+        $this->redirect("index.php?route=register");
     }
 }

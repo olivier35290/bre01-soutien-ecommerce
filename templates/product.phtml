@@ -1,0 +1,10 @@
+<main class="container py-5">
+    <img src="<?= $data["product"]->getImageUrl() ?>" class="img-fluid" alt="<?= $data["product"]->getImageAlt() ?>">
+    <h2 class="my-4"><?= $data["product"]->getName() ?></h2>
+    <p class="my-4">
+        <?= $data["product"]->getDescription() ?>
+    </p>
+    <p class="text-bold">
+        <?= $data["product"]->getPrice() ?> $
+    </p>
+</main>

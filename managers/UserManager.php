@@ -12,53 +12,12 @@ class UserManager extends AbstractManager
         parent::__construct();
     }
 
-    public function findByEmail(string $email) : ? User
-    {
-        $query = $this->db->prepare('SELECT * FROM users WHERE email=:email');
-
-        $parameters = [
-            "email" => $email
-        ];
-
-        $query->execute($parameters);
-        $result = $query->fetch(PDO::FETCH_ASSOC);
-
-        if($result)
-        {
-            $user = new User($result["email"], $result["password"], $result["role"]);
-            $user->setId($result["id"]);
-
-            return $user;
-        }
-
-        return null;
-    }
-
-    public function findOne(int $id) : ? User
-    {
-        $query = $this->db->prepare('SELECT * FROM users WHERE id=:id');
-
-        $parameters = [
-            "id" => $id
-        ];
-
-        $query->execute($parameters);
-        $result = $query->fetch(PDO::FETCH_ASSOC);
-
-        if($result)
-        {
-            $user = new User($result["username"], $result["email"], $result["password"], $result["role"]);
-            $user->setId($result["id"]);
-
-            return $user;
-        }
-
-        return null;
-    }
-
+    /**
+     * @param User $user
+     * @return void
+     */
     public function create(User $user) : void
     {
-
         $query = $this->db->prepare('INSERT INTO users (id, email, password, role) VALUES (NULL, :email, :password, :role)');
         $parameters = [
             "password" => $user->getPassword(),
@@ -69,6 +28,31 @@ class UserManager extends AbstractManager
         $query->execute($parameters);
 
         $user->setId($this->db->lastInsertId());
+    }
 
+    /**
+     * @param string $email
+     * @return User|null
+     */
+    public function findByEmail(string $email) : ? User
+    {
+        $query = $this->db->prepare('SELECT * FROM users WHERE email=:email');
+        $parameters = [
+            "email" => $email
+        ];
+        $query->execute($parameters);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+
+        if($result)
+        {
+            $user = new User($result["email"], $result["password"], $result["role"]);
+            $user->setId($result["id"]);
+
+            return $user;
+        }
+        else
+        {
+            return null;
+        }
     }
 }
