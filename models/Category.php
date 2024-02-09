@@ -9,7 +9,7 @@ class Category
 {
     private ? int $id = null;
 
-    public function __construct(private string $title, private string $description)
+    public function __construct(private string $name, private string $description)
     {
 
     }
@@ -33,17 +33,17 @@ class Category
     /**
      * @return string
      */
-    public function getTitle(): string
+    public function getName(): string
     {
-        return $this->title;
+        return $this->name;
     }
 
     /**
-     * @param string $title
+     * @param string $name
      */
-    public function setTitle(string $title): void
+    public function setTitle(string $name): void
     {
-        $this->title = $title;
+        $this->name = $name;
     }
 
     /**

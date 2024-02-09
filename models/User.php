@@ -8,7 +8,7 @@ class User
 {
     private ? int $id = null;
 
-    public function __construct(private string $username, private string $email, private string $password, private string $role = "USER")
+    public function __construct(private string $email, private string $password, private string $role = "USER")
     {
 
     }
@@ -27,22 +27,6 @@ class User
     public function setId(?int $id): void
     {
         $this->id = $id;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUsername(): string
-    {
-        return $this->username;
-    }
-
-    /**
-     * @param string $username
-     */
-    public function setUsername(string $username): void
-    {
-        $this->username = $username;
     }
 
     /**

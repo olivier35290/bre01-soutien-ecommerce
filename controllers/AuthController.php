@@ -66,8 +66,7 @@ class AuthController extends AbstractController
 
     public function checkRegister() : void
     {
-        if(isset($_POST["username"]) && isset($_POST["email"])
-            && isset($_POST["password"]) && isset($_POST["confirm-password"]))
+        if(isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm-password"]))
         {
             $tokenManager = new CSRFTokenManager();
             if(isset($_POST["csrf-token"]) && $tokenManager->validateCSRFToken($_POST["csrf-token"]))
@@ -83,10 +82,9 @@ class AuthController extends AbstractController
 
                         if($user === null)
                         {
-                            $username = htmlspecialchars($_POST["username"]);
                             $email = htmlspecialchars($_POST["email"]);
                             $password = password_hash($_POST["password"], PASSWORD_BCRYPT);
-                            $user = new User($username, $email, $password);
+                            $user = new User($email, $password);
 
                             $um->create($user);
 

@@ -25,7 +25,7 @@ class UserManager extends AbstractManager
 
         if($result)
         {
-            $user = new User($result["username"], $result["email"], $result["password"], $result["role"]);
+            $user = new User($result["email"], $result["password"], $result["role"]);
             $user->setId($result["id"]);
 
             return $user;
@@ -58,15 +58,12 @@ class UserManager extends AbstractManager
 
     public function create(User $user) : void
     {
-        $currentDateTime = date('Y-m-d H:i:s');
 
-        $query = $this->db->prepare('INSERT INTO users (id, username, email, password, role, created_at) VALUES (NULL, :username, :email, :password, :role, :created_at)');
+        $query = $this->db->prepare('INSERT INTO users (id, email, password, role) VALUES (NULL, :email, :password, :role)');
         $parameters = [
-            "username" => $user->getUsername(),
             "password" => $user->getPassword(),
             "email" => $user->getEmail(),
             "role" => $user->getRole(),
-            "created_at" => $currentDateTime,
         ];
 
         $query->execute($parameters);
